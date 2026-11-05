@@ -1,1 +1,36 @@
-
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 260" width="900" height="260">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0f0a"/>
+      <stop offset="100%" stop-color="#050805"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="2.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="900" height="260" fill="url(#g)"/>
+  <g fill="#1f7a1f" font-family="monospace" font-size="11" opacity="0.5">
+    <text x="0" y="20"><animateTransform attributeName="transform" type="translate" from="0 0" to="-70 0" dur="6s" repeatCount="indefinite"/>01001010 11010011 00101101 10110010 01001110 11010010 00110101 10010110 01001011</text>
+    <text x="0" y="240"><animateTransform attributeName="transform" type="translate" from="0 0" to="70 0" dur="8s" repeatCount="indefinite"/>11010010 00101101 10010110 01001011 10110010 00110101 11010011 01001010 00101101</text>
+  </g>
+  <g transform="translate(70,50)" filter="url(#glow)">
+    <path d="M40 0 C18 0 0 18 0 40 c0 9 3 17 8 23 L2 92 l30-8 c6 3 13 4 20 4 22 0 40-18 40-40 S62 0 40 0z" fill="none" stroke="#25d366" stroke-width="4">
+      <animate attributeName="stroke-opacity" values="1;0.35;1" dur="1.6s" repeatCount="indefinite"/>
+    </path>
+    <path d="M26 30 c0 12 14 26 26 26 l6-7-8-6-5 4 c-4-2-8-6-10-10 l4-5-6-8z" fill="#25d366">
+      <animate attributeName="opacity" values="1;0.5;1" dur="1.6s" repeatCount="indefinite"/>
+    </path>
+  </g>
+  <g font-family="monospace" filter="url(#glow)">
+    <text x="190" y="100" fill="#7dff7d" font-size="34" letter-spacing="4">M4ZK1PL4Y</text>
+    <text x="190" y="138" fill="#25d366" font-size="26" letter-spacing="8" opacity="0.9">WHATSAP</text>
+    <text x="192" y="168" fill="#4a8a4a" font-size="12" letter-spacing="2">payload · force close · otp flood</text>
+  </g>
+  <rect x="190" y="182" width="120" height="3" fill="#25d366">
+    <animate attributeName="width" values="0;300;300;0" dur="4s" repeatCount="indefinite"/>
+  </rect>
+  <text x="190" y="215" fill="#2e6b2e" font-size="11" font-family="monospace">
+    termux + kali linux
+    <animate attributeName="opacity" values="0.2;1;0.2" dur="2s" repeatCount="indefinite"/>
+  </text>
+  <rect x="0" y="0" width="900" height="260" fill="none" stroke="#123312"/>
+</svg>
