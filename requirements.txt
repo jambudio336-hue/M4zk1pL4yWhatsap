@@ -1,0 +1,5 @@
+# M4zk1pL4yWhatsap — Python
+# Tidak ada dependensi pihak ketiga. Semua pakai stdlib:
+#   sys json base64 hashlib random time threading itertools signal
+#   urllib.parse urllib.request concurrent.futures
+# Python >= 3.8
