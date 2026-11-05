@@ -1,0 +1,17 @@
+{
+  "name": "m4zk1pl4ywhatsap",
+  "version": "2.0.0",
+  "description": "Brutal WhatsApp stress toolkit — delay, force-close loop, OTP flood",
+  "bin": { "m4zk1p": "bin/m4zk1p" },
+  "scripts": {
+    "start": "bash bin/m4zk1p --menu",
+    "lint": "shellcheck bin/m4zk1p lib/platform.sh install.sh"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.0",
+    "qrcode-terminal": "^0.12.0",
+    "pino": "^9.0.0"
+  },
+  "license": "MIT"
+}
