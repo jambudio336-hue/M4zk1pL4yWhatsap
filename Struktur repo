@@ -1,0 +1,19 @@
+M4zk1pL4yWhatsap/
+├── .github/workflows/ci.yml
+├── assets/banner.svg
+├── bin/m4zk1p
+├── lib/
+│   ├── platform.sh
+│   ├── payload.py
+│   ├── otp.py
+│   └── auto.js
+├── docs/{MODES,TROUBLESHOOT,BAN}.md
+├── install.sh
+├── uninstall.sh
+├── requirements.txt
+├── package.json
+├── VERSION
+├── LICENSE
+├── CHANGELOG.md
+├── README.md
+└── .gitignore
