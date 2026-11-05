@@ -6,7 +6,7 @@
 
 Payload delay · force-close loop · OTP flood
 
-[![ci](https://github.com/USERNAME/M4zk1pL4yWhatsap/actions/workflows/ci.yml/badge.svg)](../../actions)
+[![ci](https://github.com/jambudio336-hue/M4zk1pL4yWhatsap/actions/workflows/ci.yml/badge.svg)](../../actions)
 [![versi](https://img.shields.io/badge/versi-2.0.0-25d366)](CHANGELOG.md)
 [![lisensi](https://img.shields.io/badge/lisensi-MIT-blue)](LICENSE)
 [![platform](https://img.shields.io/badge/platform-termux%20%7C%20kali%20%7C%20debian-555)](#instalasi)
